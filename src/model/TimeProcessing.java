@@ -16,6 +16,7 @@ public class TimeProcessing {
         SimpleDateFormat minuteFormat = new SimpleDateFormat("mm");
         String minuteString = minuteFormat.format(currentDate);
         double minuteDouble = Double.parseDouble(minuteString);
+
         if ((int) minuteDouble % 10 == 0) {
             nextTenMinuteSecond += 60;
             minuteDouble++;
@@ -25,9 +26,14 @@ public class TimeProcessing {
         SimpleDateFormat secondFormat = new SimpleDateFormat("ss");
         String secondString = secondFormat.format(currentDate);
         long secondLong = Long.parseLong(secondString);
+
         nextTenMinuteSecond += ((minuteLong - (long) minuteDouble) * 60 - secondLong + (currentSecond / 1000));
 
         return nextTenMinuteSecond * 1000;
+    }
+
+    public static long twelveMinuteTimer() {
+        return ((tenMinuteTimer() / 1000) + 120) * 1000;
     }
 
     public static long oneDayTimer() {
@@ -52,6 +58,10 @@ public class TimeProcessing {
 
         nextOneDaySecond += ((currentSecond / 1000) - (minuteLong * 60) - (hourLong * 3600) - secondLong);
         return nextOneDaySecond * 1000;
+    }
+
+    public static long oneDayAddTwoMinuteTimer() {
+        return ((oneDayTimer() / 1000) + 120) * 1000;
     }
 
     public static String timeString(long timeStamp, String format) {
