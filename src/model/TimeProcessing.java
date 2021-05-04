@@ -71,6 +71,22 @@ public class TimeProcessing {
     }
 
     public static long fiveMinuteTimer() {
-        return (tenMinuteTimer() / 1000 - 300) * 1000;
+        setTime = System.currentTimeMillis();
+        currentDate = new Date(setTime);
+        //minute
+        SimpleDateFormat minuteFormat = new SimpleDateFormat("mm");
+        String minuteString = minuteFormat.format(currentDate);
+        double minuteDouble = Double.parseDouble(minuteString);
+        //if minuteDouble = 16.0
+        //minuteLong = 10
+        //oneDigitMinute = 16 - 10 = 6
+        long minuteLong = (long) ((Math.ceil(minuteDouble / 10)) * 10) - 10;
+        long oneDigitMinute = (long) minuteDouble - minuteLong;
+
+        if (oneDigitMinute < 5) {
+            return (tenMinuteTimer() / 1000 - 300) * 1000;
+        } else {
+            return tenMinuteTimer();
+        }
     }
 }
