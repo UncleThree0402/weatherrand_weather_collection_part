@@ -41,6 +41,7 @@ public class Main {
 
                 while (true) {
                     if (initialize) {
+                        datasource.createEarthquakeTable();
                         for (int i = 0; i < JsonStoring.locationName.length; i++) {
                             datasource.createDnHForecastTable(JsonStoring.locationName[i]);
                             datasource.createCurrentlyForecastTable(JsonStoring.locationName[i]);
@@ -49,6 +50,10 @@ public class Main {
                         }
                         initialize = false;
                     }
+
+                    datasource.earthquakeReload();
+                    JsonStoring.updateEarthquakeArray(jsonUrlConnect);
+                    insertTable.insertEarthquakeData(datasource, JsonStoring.earthquake);
 
                     if (System.currentTimeMillis() >= checkTenMin) {
                         checkTenMin = TimeProcessing.tenMinuteTimer();

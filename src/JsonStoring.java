@@ -100,7 +100,10 @@ public class JsonStoring {
     private static JSONArray nanTouCountyAP;
     private static JSONArray hengChunAP;
 
-    private static String apiKey = "ApiKey";
+    private static final String apiKey = "ApiKey";
+    public static final String cwbApiKey = "Apikey";
+
+    public static JSONArray earthquake;
 
     public static final String[]lienChiangLatLon = {"26.160231950896055", "119.9517974931635"};
     public static final String[]kinMenLatLon = {"24.44871542964905", "118.3762715738623"};
@@ -222,7 +225,7 @@ public class JsonStoring {
     public static final String NANTOUCOUNTY_AP_URL = "http://api.openweathermap.org/data/2.5/air_pollution?lat="+ JsonStoring.nanTouCountyLatLon[0] +"&lon="+ JsonStoring.nanTouCountyLatLon[1] +"&appid=" + apiKey;
     public static final String HENGCHUN_AP_URL = "http://api.openweathermap.org/data/2.5/air_pollution?lat="+ JsonStoring.hengChunLatLon[0] +"&lon="+ JsonStoring.hengChunLatLon[1] +"&appid=" + apiKey;
 
-
+    public static final String EARTHQUAKE_URL = "https://opendata.cwb.gov.tw/api/v1/rest/datastore/E-A0015-001?Authorization="+ cwbApiKey +"&areaName=";
 
 
     public static final String[]locationName = {"LienChiang", "KinMen", "PenGhu", "TaipeiCity",
@@ -1109,6 +1112,10 @@ public class JsonStoring {
         hengChunAP = jsonUrlConnect.jsonArray(HENGCHUN_AP_URL);
         System.out.println("Air Pollution JSONArray updated | "+ LocalDateTime.now());
 
+    }
+
+    public static void updateEarthquakeArray(JsonUrlConnect jsonUrlConnect){
+        earthquake = jsonUrlConnect.jsonArray(EARTHQUAKE_URL);
     }
 
 

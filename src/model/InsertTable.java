@@ -321,6 +321,38 @@ public class InsertTable {
         }
     }
 
+    public void insertEarthquakeData(Datasource datasource, JSONArray jsonArray){
+        Object earthquakeNo, reportColor, reportContent, originTime, depth_value, magnitudeValue;
+
+        JSONObject data = (JSONObject) jsonArray.get(0);
+
+        JSONObject records = (JSONObject) data.get("records");
+        JSONArray eq = (JSONArray) records.get("earthquake");
+        JSONObject earthquake = (JSONObject) eq.get(0);
+        JSONObject earthquakeInfo = (JSONObject) earthquake.get("earthquakeInfo");
+        JSONObject depth = (JSONObject) earthquakeInfo.get("depth");
+        JSONObject magnitude = (JSONObject) earthquakeInfo.get("magnitude");
+
+
+        earthquakeNo = earthquake.get("earthquakeNo");
+        reportColor = earthquake.get("reportColor");
+        reportContent = earthquake.get("reportContent");
+        originTime = earthquakeInfo.get("originTime");
+        depth_value = depth.get("value");
+        magnitudeValue = magnitude.get("magnitudeValue");
+
+        try{
+            datasource.getStatement().execute("INSERT INTO earthquake " +
+                    "(earthquakeNo, reportColor, reportContent, originTime, depth_value, magnitudeValue)" +
+                    "VALUES ( " + earthquakeNo + ", N'" + reportColor+ "', " +
+                    "N'" + reportContent + "','" + originTime + "'," +
+                    depth_value + "," + magnitudeValue + ")" );
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+
     public void insertDnHWeatherForecast(Datasource datasource, String locationName, JSONArray jsonArray) {
         dailyWeatherForecast(datasource, locationName + "DailyWeatherForecast", jsonArray);
         hourlyWeatherForecast(datasource, locationName + "HourlyWeatherForecast", jsonArray);

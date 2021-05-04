@@ -177,6 +177,21 @@ public class Datasource {
         }
     }
 
+    public void createEarthquakeTable(){
+        if(statement == null){
+            System.out.println("Statement not open | " + LocalDateTime.now());
+        } else {
+            try{
+                getStatement().execute("IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[earthquake]') AND type in (N'U')) CREATE TABLE earthquake " +
+                        "(earthquakeNo BIGINT, reportColor NVARCHAR(5), reportContent NVARCHAR(50) , originTime VARCHAR(30)," +
+                        "depth_value FLOAT , magnitudeValue FLOAT)");
+
+            }catch (SQLException e){
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void createDnHForecastTable(String locationName){
         createDailyForecastTable(locationName+"DailyWeatherForecast");
         createHourlyForecastTable(locationName+"HourlyWeatherForecast");
@@ -187,6 +202,13 @@ public class Datasource {
             getStatement().execute("DELETE FROM " + locationName + "HourlyWeatherForecast");
             getStatement().execute("DELETE FROM " + locationName + "30DaysWeatherForecast");
             System.out.println("Location : " + locationName + " reloaded | " + LocalDateTime.now());
+        } catch (SQLException ignored){
+        }
+    }
+
+    public void earthquakeReload(){
+        try {
+            getStatement().execute("DELETE FROM earthquake");
         } catch (SQLException ignored){
         }
     }
