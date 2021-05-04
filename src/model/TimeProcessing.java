@@ -69,4 +69,8 @@ public class TimeProcessing {
         SimpleDateFormat dateFormat = new SimpleDateFormat(format);
         return dateFormat.format(date);
     }
+
+    public static long fiveMinuteTimer() {
+        return (tenMinuteTimer() / 1000 - 300) * 1000;
+    }
 }
