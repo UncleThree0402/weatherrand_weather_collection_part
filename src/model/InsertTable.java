@@ -57,7 +57,7 @@ public class InsertTable {
                 dewPoint = dailyData.get("dew_point");
                 sunset = dailyData.get("sunset");
                 hourMinSs = TimeProcessing.timeString((long) dailyData.get("sunset"), "HH:mm");
-                weatherIcon = weather.get("icon");
+                weatherIcon = "http://openweathermap.org/img/wn/" + weather.get("icon") + "@2x.png";
                 weatherDe = weather.get("description");
                 weatherMain = weather.get("main");
                 weatherId = weather.get("id");
@@ -124,7 +124,7 @@ public class InsertTable {
                 wind_deg_text = windDegreeString((long) listData.get("deg"));
                 sunset = listData.get("sunset");
                 hourMinSs = TimeProcessing.timeString((long) listData.get("sunset"), "HH:mm");
-                weatherIcon = weather.get("icon");
+                weatherIcon = "http://openweathermap.org/img/wn/" + weather.get("icon") + "@2x.png";
                 weatherDe = weather.get("description");
                 weatherMain = weather.get("main");
                 weatherId = weather.get("id");
@@ -187,7 +187,7 @@ public class InsertTable {
                 dew_point = hourlyData.get("dew_point");
                 humidity = hourlyData.get("humidity");
                 wind_speed = hourlyData.get("wind_speed");
-                weatherIcon = weather.get("icon");
+                weatherIcon = "http://openweathermap.org/img/wn/" + weather.get("icon") + "@2x.png";
                 weatherDe = weather.get("description");
                 weatherMain = weather.get("main");
                 weatherId = weather.get("id");
@@ -271,7 +271,7 @@ public class InsertTable {
             if(wind_gust == null){
                 wind_gust = 0;
             }
-            weather_icon = weather.get("icon");
+            weather_icon = "http://openweathermap.org/img/wn/" + weather.get("icon") + "@2x.png";
             weather_description = weather.get("description");
             weather_main = weather.get("main");
             weather_id = weather.get("id");

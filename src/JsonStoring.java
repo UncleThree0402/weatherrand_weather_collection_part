@@ -100,7 +100,7 @@ public class JsonStoring {
     private static JSONArray nanTouCountyAP;
     private static JSONArray hengChunAP;
 
-    private static final String apiKey = "ApiKey";
+    private static final String apiKey = "Apikey";
     public static final String cwbApiKey = "Apikey";
 
     public static JSONArray earthquake;

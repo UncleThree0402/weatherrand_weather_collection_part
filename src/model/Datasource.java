@@ -117,7 +117,7 @@ public class Datasource {
                         "feels_like_eve FLOAT, feels_like_night FLOAT, feels_like_day FLOAT, feels_like_morn FLOAT, " +
                         "uvi FLOAT, pressure INTEGER, clouds INTEGER, pop FLOAT, humidity INTEGER, dew_point FLOAT," +
                         "wind_deg INTEGER, wind_deg_text VARCHAR(20), wind_gust FLOAT, wind_speed FLOAT, " +
-                        "weather_icon VARCHAR(20), weather_description VARCHAR(20), weather_main VARCHAR(20), weather_id INTEGER)");
+                        "weather_icon VARCHAR(100), weather_description VARCHAR(20), weather_main VARCHAR(20), weather_id INTEGER)");
             } catch (SQLException e){
                 e.printStackTrace();
             }
@@ -133,7 +133,7 @@ public class Datasource {
                         "dt BIGINT, hourDt VARCHAR(20), temp FLOAT, feels_like FLOAT, uvi FLOAT, " +
                         "pressure INTEGER, clouds INTEGER, pop FLOAT, humidity INTEGER, visibility INTEGER,  dew_point FLOAT," +
                         "wind_deg INTEGER, wind_deg_text VARCHAR(20), wind_gust FLOAT, wind_speed FLOAT, " +
-                        "weather_icon VARCHAR(20), weather_description VARCHAR(20), weather_main VARCHAR(20), weather_id INTEGER)");
+                        "weather_icon VARCHAR(100), weather_description VARCHAR(20), weather_main VARCHAR(20), weather_id INTEGER)");
             } catch (SQLException e){
                 e.printStackTrace();
             }
@@ -151,7 +151,7 @@ public class Datasource {
                         "aqi FLOAT, ap_co FLOAT, ap_no FLOAT, ap_no2 FLOAT, ap_o3 FLOAT, ap_so2 FLOAT, ap_pm2_5 FLOAT, ap_pm10 FLOAT, ap_nh3 FLOAT," +
                         "wind_speed FLOAT, wind_deg INTEGER, wind_deg_text VARCHAR(20), wind_gust FLOAT," +
                         "clouds INTEGER,  rain_1h FLOAT, rain_3h FLOAT, snow_1h FLOAT, snow_3h FLOAT," +
-                        "weather_icon VARCHAR(20), weather_description VARCHAR(20), weather_main VARCHAR(20), weather_id INTEGER)");
+                        "weather_icon VARCHAR(100), weather_description VARCHAR(20), weather_main VARCHAR(20), weather_id INTEGER)");
             } catch (SQLException e){
                 e.printStackTrace();
             }
@@ -170,7 +170,7 @@ public class Datasource {
                         "pressure INTEGER, clouds INTEGER, humidity INTEGER," +
                         "wind_deg INTEGER, wind_deg_text VARCHAR(20), wind_speed FLOAT, " +
                         "rain FLOAT, snow FLOAT, " +
-                        "weather_icon VARCHAR(20), weather_description VARCHAR(20), weather_main VARCHAR(20), weather_id INTEGER)");
+                        "weather_icon VARCHAR(100), weather_description VARCHAR(20), weather_main VARCHAR(20), weather_id INTEGER)");
             } catch (SQLException e){
                 e.printStackTrace();
             }
