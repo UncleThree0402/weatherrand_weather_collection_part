@@ -1,4 +1,4 @@
-package model;
+package database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -6,45 +6,34 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 
-public class Datasource {
-    private static String ipAddress;
-    private static String databaseName;
-    private static String username;
-    private static String password;
+@SuppressWarnings("SqlNoDataSourceInspection")
+public class WeatherDatabase {
+
+    private String ipAddress;
+    private String databaseName;
+    private String username;
+    private String password;
 
     private Connection conn;
     private Statement statement;
 
-    public static String getIpAddress() {
-        return ipAddress;
+    private final String[] locationName = {"LienChiang", "KinMen", "PenGhu", "TaipeiCity",
+            "NewTaipeiCity", "TaoYuanCity", "HsinChuCity", "HsinChuCounty",
+            "MiaoLiCounty", "TaichungCity", "ChangHuaCounty", "YunLinCounty",
+            "ChiaYiCounty", "ChiaYiCity", "TaiNanCity", "kaoHsiungCity",
+            "PingTungCounty", "TaiTungCounty", "HuaLienCounty", "YiLanCounty",
+            "KeeLungCity", "NanTouCounty", "HengChun"};
+
+    public WeatherDatabase(String ipAddress, String databaseName, String username, String password) {
+        this.ipAddress = ipAddress;
+        this.databaseName = databaseName;
+        this.username = username;
+        this.password = password;
+        init();
     }
 
-    public static void setIpAddress(String ipAddress) {
-        Datasource.ipAddress = ipAddress;
-    }
-
-    public static String getDatabaseName() {
-        return databaseName;
-    }
-
-    public static void setDatabaseName(String databaseName) {
-        Datasource.databaseName = databaseName;
-    }
-
-    public static String getUsername() {
-        return username;
-    }
-
-    public static void setUsername(String username) {
-        Datasource.username = username;
-    }
-
-    public static String getPassword() {
-        return password;
-    }
-
-    public static void setPassword(String password) {
-        Datasource.password = password;
+    public String[] getLocationName() {
+        return locationName;
     }
 
     public Connection getConn() {
@@ -57,7 +46,7 @@ public class Datasource {
 
     public boolean dbConnect() {
         try {
-            conn = DriverManager.getConnection("jdbc:sqlserver://" + Datasource.ipAddress + ";databaseName=" + Datasource.databaseName, Datasource.username, Datasource.password);
+            conn = DriverManager.getConnection("jdbc:sqlserver://" + ipAddress + ";databaseName=" + databaseName, username, password);
             System.out.println("Database Connected | " + LocalDateTime.now());
             return true;
         } catch (SQLException e) {
@@ -94,130 +83,119 @@ public class Datasource {
     }
 
     public void statementClose() {
-        if(statement == null){
+        if (statement == null) {
             System.out.println("Statement didn't open | " + LocalDateTime.now());
         } else {
-            try{
+            try {
                 statement.close();
                 System.out.println("Statement Closed | " + LocalDateTime.now());
-            } catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public void createDailyForecastTable(String tableName){
-        if(statement ==null){
+    private void init() {
+        if (!dbConnect()) {
+            System.out.println("Fail to connected | " + LocalDateTime.now());
+        } else {
+            if (!statementOpen()) {
+                System.out.println("Fail to open statement | " + LocalDateTime.now());
+            } else {
+                for (int i = 0; i < locationName.length; i++) {
+                    createCurrentlyForecastTable(locationName[i]);
+                    createHourlyForecastTable(locationName[i] + "HourlyWeatherForecast");
+                    createDailyForecastTable(locationName[i] + "DailyWeatherForecast");
+                    create30DaysForecastTable(locationName[i]);
+                }
+                createEarthquakeTable();
+            }
+        }
+    }
+
+    private void createDailyForecastTable(String tableName) {
+        if (statement == null) {
             System.out.println("Statement not open | " + LocalDateTime.now());
         } else {
             try {
-                getStatement().execute("IF  NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[" + tableName + "]') AND type in (N'U')) CREATE TABLE " + tableName + "(_id INTEGER IDENTITY , " +
-                        "dt BIGINT, monthDayDt VARCHAR(20), sunrise BIGINT, hourMinSr VARCHAR(20) ,sunset BIGINT, hourMinSs VARCHAR(20) ,moonrise BIGINT, hourMinMr VARCHAR(20), moonset BIGINT, hourMinMs VARCHAR(20), moon_phase FLOAT, " +
+                getStatement().execute("IF  NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[" + tableName + "]') AND type in (N'U')) CREATE TABLE " + tableName + "(" +
+                        "dt BIGINT,  sunrise BIGINT, sunset BIGINT, moonrise BIGINT,  moonset BIGINT,  moon_phase FLOAT, " +
                         "temp_min FLOAT, temp_max FLOAT, temp_eve FLOAT, temp_night FLOAT, temp_day FLOAT, temp_morn FLOAT," +
                         "feels_like_eve FLOAT, feels_like_night FLOAT, feels_like_day FLOAT, feels_like_morn FLOAT, " +
                         "uvi FLOAT, pressure INTEGER, clouds INTEGER, pop FLOAT, humidity INTEGER, dew_point FLOAT," +
                         "wind_deg INTEGER, wind_deg_text VARCHAR(20), wind_gust FLOAT, wind_speed FLOAT, " +
                         "weather_icon VARCHAR(100), weather_description VARCHAR(20), weather_main VARCHAR(20), weather_id INTEGER)");
-            } catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public void createHourlyForecastTable(String tableName){
-        if(statement ==null){
+    private void createHourlyForecastTable(String tableName) {
+        if (statement == null) {
             System.out.println("Statement not open | " + LocalDateTime.now());
         } else {
             try {
-                getStatement().execute("IF  NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[" + tableName + "]') AND type in (N'U')) CREATE TABLE " + tableName + "(_id INTEGER IDENTITY, " +
-                        "dt BIGINT, hourDt VARCHAR(20), temp FLOAT, feels_like FLOAT, uvi FLOAT, " +
+                getStatement().execute("IF  NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[" + tableName + "]') AND type in (N'U')) CREATE TABLE " + tableName + "(" +
+                        "dt BIGINT,temp FLOAT, feels_like FLOAT, uvi FLOAT, " +
                         "pressure INTEGER, clouds INTEGER, pop FLOAT, humidity INTEGER, visibility INTEGER,  dew_point FLOAT," +
                         "wind_deg INTEGER, wind_deg_text VARCHAR(20), wind_gust FLOAT, wind_speed FLOAT, " +
                         "weather_icon VARCHAR(100), weather_description VARCHAR(20), weather_main VARCHAR(20), weather_id INTEGER)");
-            } catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public void createCurrentlyForecastTable(String locationName){
-        if(statement ==null){
+    private void createCurrentlyForecastTable(String locationName) {
+        if (statement == null) {
             System.out.println("Statement not open | " + LocalDateTime.now());
         } else {
             try {
-                getStatement().execute("IF  NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[" + locationName + "CurrentlyWeather" + "]') AND type in (N'U')) CREATE TABLE " + locationName + "CurrentlyWeather" + "(_id INTEGER IDENTITY, " +
-                        "dt BIGINT,  hourMinDt VARCHAR(20), sunrise BIGINT, hourMinSr VARCHAR(20) , sunset BIGINT, hourMinSs VARCHAR(20) ," +
+                getStatement().execute("IF  NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[" + locationName + "CurrentlyWeather" + "]') AND type in (N'U')) CREATE TABLE " + locationName + "CurrentlyWeather" + "(" +
+                        "dt BIGINT, sunrise BIGINT, sunset BIGINT, " +
                         "temp FLOAT, feels_like FLOAT, pressure FLOAT, humidity INTEGER, temp_min FLOAT, temp_max FLOAT, sea_level FLOAT, grnd_level FLOAT, visibility INTEGER, " +
                         "aqi FLOAT, ap_co FLOAT, ap_no FLOAT, ap_no2 FLOAT, ap_o3 FLOAT, ap_so2 FLOAT, ap_pm2_5 FLOAT, ap_pm10 FLOAT, ap_nh3 FLOAT," +
                         "wind_speed FLOAT, wind_deg INTEGER, wind_deg_text VARCHAR(20), wind_gust FLOAT," +
-                        "clouds INTEGER,  rain_1h FLOAT, rain_3h FLOAT, snow_1h FLOAT, snow_3h FLOAT," +
+                        "clouds INTEGER, " +
                         "weather_icon VARCHAR(100), weather_description VARCHAR(20), weather_main VARCHAR(20), weather_id INTEGER)");
-            } catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public void create30DaysForecastTable(String locationName){
-        if(statement ==null){
+    private void create30DaysForecastTable(String locationName) {
+        if (statement == null) {
             System.out.println("Statement not open | " + LocalDateTime.now());
         } else {
             try {
-                getStatement().execute("IF  NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[" + locationName + "30DaysWeatherForecast"+ "]') AND type in (N'U')) CREATE TABLE " + locationName + "30DaysWeatherForecast" + "(_id INTEGER IDENTITY, " +
-                        "dt BIGINT, monthDayDt VARCHAR(20), sunrise BIGINT ,hourMinSr VARCHAR(20) , sunset BIGINT, hourMinSs VARCHAR(20) ," +
+                getStatement().execute("IF  NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[" + locationName + "30DaysWeatherForecast" + "]') AND type in (N'U')) CREATE TABLE " + locationName + "30DaysWeatherForecast" + "(" +
+                        "dt BIGINT, sunrise BIGINT ,sunset BIGINT, " +
                         "temp_min FLOAT, temp_max FLOAT, temp_eve FLOAT, temp_night FLOAT, temp_day FLOAT, temp_morn FLOAT," +
                         "feels_like_eve FLOAT, feels_like_night FLOAT, feels_like_day FLOAT, feels_like_morn FLOAT, " +
                         "pressure INTEGER, clouds INTEGER, humidity INTEGER," +
                         "wind_deg INTEGER, wind_deg_text VARCHAR(20), wind_speed FLOAT, " +
                         "rain FLOAT, snow FLOAT, " +
                         "weather_icon VARCHAR(100), weather_description VARCHAR(20), weather_main VARCHAR(20), weather_id INTEGER)");
-            } catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public void createEarthquakeTable(){
-        if(statement == null){
+    private void createEarthquakeTable() {
+        if (statement == null) {
             System.out.println("Statement not open | " + LocalDateTime.now());
         } else {
-            try{
+            try {
                 getStatement().execute("IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[earthquake]') AND type in (N'U')) CREATE TABLE earthquake " +
-                        "(earthquakeNo BIGINT, reportColor NVARCHAR(5), reportContent NVARCHAR(50) , originTime VARCHAR(30)," +
+                        "(earthquakeNo BIGINT, reportColor NVARCHAR(5), reportContent NVARCHAR(100) , originTime VARCHAR(30)," +
                         "depth_value FLOAT , magnitudeValue FLOAT)");
 
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    public void createDnHForecastTable(String locationName){
-        createDailyForecastTable(locationName+"DailyWeatherForecast");
-        createHourlyForecastTable(locationName+"HourlyWeatherForecast");
-    }
-    public void OneDayReload(String locationName){
-        try {
-            getStatement().execute("DELETE FROM " + locationName + "DailyWeatherForecast");
-            getStatement().execute("DELETE FROM " + locationName + "HourlyWeatherForecast");
-            getStatement().execute("DELETE FROM " + locationName + "30DaysWeatherForecast");
-            System.out.println("Location : " + locationName + " reloaded | " + LocalDateTime.now());
-        } catch (SQLException ignored){
-        }
-    }
-
-    public void earthquakeReload(){
-        try {
-            getStatement().execute("DELETE FROM earthquake");
-        } catch (SQLException ignored){
-        }
-    }
-
-    public void TenMinReload(String locationName){
-        try {
-            getStatement().execute("DELETE FROM " + locationName + "CurrentlyWeather");
-            System.out.println("Location : " + locationName + " reloaded | " + LocalDateTime.now());
-        } catch (SQLException ignored){
         }
     }
 }

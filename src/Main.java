@@ -1,109 +1,70 @@
-import model.Datasource;
-import model.InsertTable;
-import model.JsonUrlConnect;
-import model.TimeProcessing;
+import database.WeatherDataRepository;
+import formatter.TimeProcessing;
 
 import java.time.LocalDateTime;
 import java.util.Scanner;
 
 public class Main {
 
+    private static String ipAddress;
+    private static String databaseName;
+    private static String username;
+    private static String password;
+    private WeatherDataRepository mWeatherDataRepository;
+
     public static void main(String[] args) {
-        Datasource datasource = new Datasource();
-        InsertTable insertTable = new InsertTable();
-        JsonUrlConnect jsonUrlConnect = new JsonUrlConnect();
+        WeatherDataRepository mWeatherDataRepository;
         long checkTenMin = System.currentTimeMillis();
         long checkOneDay = System.currentTimeMillis();
+        long checkFiveMin = System.currentTimeMillis();
         boolean initialize = true;
         boolean closeSignal = false;
 
+
         Scanner scanner = new Scanner(System.in);
         System.out.println("Ip Address:");
-        Datasource.setIpAddress(scanner.next());
+        ipAddress = scanner.next();
         scanner.nextLine();
         System.out.println("Database Name:");
-        Datasource.setDatabaseName(scanner.next());
+        databaseName = scanner.next();
         scanner.nextLine();
         System.out.println("Username:");
-        Datasource.setUsername(scanner.next());
+        username = scanner.next();
         scanner.nextLine();
         System.out.println("Password:");
-        Datasource.setPassword(scanner.next());
+        password = scanner.next();
         scanner.close();
 
+        mWeatherDataRepository = new WeatherDataRepository(ipAddress, databaseName, username, password);
 
-        if (!datasource.dbConnect()) {
-            System.out.println("Fail to connected | " + LocalDateTime.now());
-        } else {
-            if (!datasource.statementOpen()) {
-                System.out.println("Fail to open statement | " + LocalDateTime.now());
-            } else {
 
-                while (true) {
-                    if (initialize) {
-                        datasource.createEarthquakeTable();
-                        for (int i = 0; i < JsonStoring.locationName.length; i++) {
-                            datasource.createDnHForecastTable(JsonStoring.locationName[i]);
-                            datasource.createCurrentlyForecastTable(JsonStoring.locationName[i]);
-                            datasource.create30DaysForecastTable(JsonStoring.locationName[i]);
-                            System.out.println("Table of : " + JsonStoring.locationName[i] + " checked or created | " + LocalDateTime.now());
-                        }
-                        initialize = false;
-                    }
+        while (true) {
 
-                    datasource.earthquakeReload();
-                    JsonStoring.updateEarthquakeArray(jsonUrlConnect);
-                    insertTable.insertEarthquakeData(datasource, JsonStoring.earthquake);
+            if (System.currentTimeMillis() >= checkFiveMin) {
+                checkFiveMin = TimeProcessing.fiveMinuteTimer();
+                mWeatherDataRepository.updateFiveMin();
+            }
 
-                    if (System.currentTimeMillis() >= checkTenMin) {
-                        checkTenMin = TimeProcessing.tenMinuteTimer();
-                        System.out.println(checkTenMin);
-                        for (int i = 0; i < JsonStoring.locationName.length; i++) {
-                            datasource.TenMinReload(JsonStoring.locationName[i]);
-                        }
+            if (System.currentTimeMillis() >= checkTenMin) {
+                checkTenMin = TimeProcessing.tenMinuteTimer();
+                System.out.println(checkTenMin);
+                mWeatherDataRepository.updateTenMin();
+                System.out.println("Inserted Ten Min data | " + LocalDateTime.now());
 
-                        JsonStoring.updateCuJSONArray(jsonUrlConnect);
-                        JsonStoring.updateAPJSONArray(jsonUrlConnect);
-                        JsonStoring.updateCuArray();
-                        JsonStoring.updateAPArray();
-
-                        for (int i = 0; i < JsonStoring.locationName.length; i++) {
-                            insertTable.currentlyWeather(datasource, JsonStoring.locationName[i], JsonStoring.jsongetCuArray[i]);
-                            insertTable.insertCurrentAirPollution(datasource, JsonStoring.locationName[i], JsonStoring.jsongetAPArray[i]);
-                            System.out.println("Inserted " + JsonStoring.locationName[i] + " Ten Min data | " + LocalDateTime.now());
-                        }
-
-                    }
-
-                    if (System.currentTimeMillis() >= checkOneDay) {
-                        checkOneDay = TimeProcessing.oneDayTimer();
-                        System.out.println(checkOneDay);
-                        for (int i = 0; i < JsonStoring.locationName.length; i++) {
-                            datasource.OneDayReload(JsonStoring.locationName[i]);
-                        }
-
-                        JsonStoring.updateDnHJSONArray(jsonUrlConnect);
-                        JsonStoring.update30DJSONArray(jsonUrlConnect);
-                        JsonStoring.updateDnHArray();
-                        JsonStoring.update30DArray();
-
-                        for (int i = 0; i < JsonStoring.locationName.length; i++) {
-                            insertTable.insertDnHWeatherForecast(datasource, JsonStoring.locationName[i], JsonStoring.jsongetArray[i]);
-                            insertTable.days30WeatherForecast(datasource, JsonStoring.locationName[i], JsonStoring.jsonget30DArray[i]);
-                            System.out.println("Inserted " + JsonStoring.locationName[i] + " One Day data | " + LocalDateTime.now());
-                        }
-
-                    }
-
-                    if (closeSignal) {
-                        break;
-                    }
-                }
-
-                datasource.statementClose();
-                datasource.dbDisconnect();
 
             }
+
+            if (System.currentTimeMillis() >= checkOneDay) {
+                checkOneDay = TimeProcessing.oneDayTimer();
+                System.out.println(checkOneDay);
+                mWeatherDataRepository.updateOneDay();
+                System.out.println("Inserted One Day data | " + LocalDateTime.now());
+            }
+
         }
+
+
     }
+
 }
+

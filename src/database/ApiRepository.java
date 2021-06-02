@@ -1,4 +1,4 @@
-package model;
+package database;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -13,9 +13,9 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
-public class JsonUrlConnect {
+public class ApiRepository {
 
-    public JSONArray jsonArray(String urlQueryString) {
+    public JSONArray jsonArray(String urlQueryString){
         try {
             URL url = new URL(urlQueryString);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
